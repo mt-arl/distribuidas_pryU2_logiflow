@@ -3,10 +3,10 @@ spring:
     name: billing-service
 
   datasource:
-    # Por defecto se conecta a la base de datos 'delivery' en localhost:5433 (docker-compose de este módulo)
-    url: ${BILLING_DATASOURCE_URL:jdbc:postgresql://localhost:5433/delivery}
-    username: ${BILLING_DATASOURCE_USERNAME:delivery_user}
-    password: ${BILLING_DATASOURCE_PASSWORD:qwerty123}
+    # Conexión fija a tu servidor principal (5432) con las credenciales proporcionadas
+    url: jdbc:postgresql://localhost:5432/delivery
+    username: delivery_user
+    password: qwerty123
     driver-class-name: org.postgresql.Driver
 
   jpa:
