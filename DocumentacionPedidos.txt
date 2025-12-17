@@ -1,0 +1,173 @@
+====================================
+PEDIDO-SERVICE – DOCUMENTACIÓN REST
+====================================
+
+Base URL (vía API Gateway – Kong):
+http://localhost:8000/api/orders
+1️⃣ CREAR ORDEN
+POST
+/api/orders
+
+Descripción
+Registra una nueva orden de delivery en el sistema.
+La orden se crea con estado inicial RECIBIDO y queda activa por defecto.
+
+Request Body (JSON)
+json
+Copiar código
+{
+  "customerName": "Juan Perez",
+  "origin": "Quito",
+  "destination": "Guayaquil",
+  "deliveryType": "URBANO"
+}
+Response – 201 CREATED
+json
+Copiar código
+{
+  "id": 1,
+  "customerName": "Juan Perez",
+  "origin": "Quito",
+  "destination": "Guayaquil",
+  "deliveryType": "URBANO",
+  "status": "RECIBIDO"
+}
+2️⃣ OBTENER ORDEN POR ID
+GET
+/api/orders/{id}
+
+Descripción
+Obtiene la información detallada de una orden específica usando su identificador único.
+
+Ejemplo URI
+text
+Copiar código
+/api/orders/1
+Response – 200 OK
+json
+Copiar código
+{
+  "id": 1,
+  "customerName": "Juan Perez",
+  "origin": "Quito",
+  "destination": "Guayaquil",
+  "deliveryType": "URBANO",
+  "status": "RECIBIDO"
+}
+Response – 404 NOT FOUND
+text
+Copiar código
+Order not found
+3️⃣ LISTAR TODAS LAS ÓRDENES ACTIVAS
+GET
+/api/orders
+
+Descripción
+Devuelve la lista de todas las órdenes activas (no canceladas).
+
+Response – 200 OK
+json
+Copiar código
+[
+  {
+    "id": 1,
+    "customerName": "Juan Perez",
+    "origin": "Quito",
+    "destination": "Guayaquil",
+    "deliveryType": "URBANO",
+    "status": "RECIBIDO"
+  },
+  {
+    "id": 2,
+    "customerName": "Maria Lopez",
+    "origin": "Cuenca",
+    "destination": "Quito",
+    "deliveryType": "INTERMUNICIPAL",
+    "status": "RECIBIDO"
+  }
+]
+4️⃣ ACTUALIZAR ORDEN
+PUT
+/api/orders/{id}
+
+Descripción
+Actualiza la información de una orden existente.
+No modifica el estado ni el identificador.
+
+Request Body (JSON)
+json
+Copiar código
+{
+  "customerName": "Juan Perez",
+  "origin": "Quito",
+  "destination": "Manta",
+  "deliveryType": "NACIONAL"
+}
+Response – 200 OK
+json
+Copiar código
+{
+  "id": 1,
+  "customerName": "Juan Perez",
+  "origin": "Quito",
+  "destination": "Manta",
+  "deliveryType": "NACIONAL",
+  "status": "RECIBIDO"
+}
+5️⃣ CANCELAR ORDEN (BAJA LÓGICA)
+DELETE
+/api/orders/{id}
+
+Descripción
+Cancela una orden de forma lógica.
+La orden no se elimina de la base de datos; se marca como inactiva y su estado cambia a CANCELADO.
+
+Ejemplo URI
+text
+Copiar código
+/api/orders/1
+Response – 204 NO CONTENT
+text
+Copiar código
+(no content)
+Response – 400 BAD REQUEST
+text
+Copiar código
+Order is already canceled
+6️⃣ BUSCAR ÓRDENES POR NOMBRE DEL CLIENTE (PARCIAL + CASE INSENSITIVE)
+GET
+/api/orders/search?customerName={valor}
+
+Descripción
+Busca órdenes por coincidencia parcial del nombre del cliente,
+ignorando mayúsculas y minúsculas.
+
+Ejemplo URI
+text
+Copiar código
+/api/orders/search?customerName=j
+Response – 200 OK
+json
+Copiar código
+[
+  {
+    "id": 1,
+    "customerName": "Juan Perez",
+    "origin": "Quito",
+    "destination": "Guayaquil",
+    "deliveryType": "URBANO",
+    "status": "RECIBIDO"
+  },
+  {
+    "id": 3,
+    "customerName": "Jordan Ruiz",
+    "origin": "Ambato",
+    "destination": "Quito",
+    "deliveryType": "INTERMUNICIPAL",
+    "status": "RECIBIDO"
+  }
+]
+Response – 404 NOT FOUND
+text
+Copiar código
+No orders found matching customer name: j
