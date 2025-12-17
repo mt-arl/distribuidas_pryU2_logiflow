@@ -2,6 +2,26 @@
 
 Este repositorio contiene un sistema basado en microservicios para una aplicación de entregas. Incluye servicios de autenticación, gestión de flota, pedidos y facturación. Está construido con Spring Boot (Java 17), Maven y PostgreSQL, y soporta ejecución local con Docker.
 
+## Índice
+
+- [Contexto del proyecto](#contexto-del-proyecto)
+- [Tecnologías](#tecnologías)
+- [Estructura del repositorio](#estructura-del-repositorio)
+- [Configuración por servicio](#configuración-por-servicio)
+- [Ejecución de los servicios](#ejecución-de-los-servicios)
+- [Endpoints por servicio](#endpoints-por-servicio)
+- [API Gateway (Kong)](#api-gateway-kong)
+	- [Arranque](#arranque)
+	- [Rutas configuradas](#rutas-configuradas)
+	- [Pruebas por el proxy](#pruebas-por-el-proxy)
+	- [Cómo ver el API Gateway](#cómo-ver-el-api-gateway)
+	- [Consideraciones](#consideraciones)
+- [Verificación en la base de datos](#verificación-en-la-base-de-datos)
+- [Pruebas](#pruebas)
+- [Consideraciones de arquitectura](#consideraciones-de-arquitectura)
+- [Solución de problemas](#solución-de-problemas)
+- [Licencia](#licencia)
+
 ## Contexto del proyecto
 
 Arquitectura por microservicios (cada servicio con su propio `pom.xml`):
@@ -140,6 +160,96 @@ mvn -DskipTests spring-boot:run
 ### pedido_service (puerto 8080)
 
 Servicio en estado inicial. Estructura y conexión a base definidas; endpoints pendientes de implementación.
+
+## API Gateway (Kong)
+
+Este repositorio incluye una configuración de Kong en modo DB-less (declarativo) para enrutar peticiones hacia los microservicios. Los archivos están en `api-gateway/`:
+
+- `api-gateway/docker-compose.yml`: definición del contenedor de Kong.
+- `api-gateway/kong.yml`: configuración declarativa de servicios y rutas.
+
+Kong se ejecuta en el puerto `8000` (proxy) y `8001` (Admin API). En macOS se usa `host.docker.internal` para que el contenedor alcance los servicios que corren en el host.
+
+### Arranque
+
+```zsh
+docker compose -f "./api-gateway/docker-compose.yml" up -d
+```
+
+Comprobación del Admin API:
+
+```zsh
+curl -s http://localhost:8001/ | jq .
+```
+
+### Rutas configuradas
+
+Según `api-gateway/kong.yml` (con `strip_path: false`, el path se preserva tal cual):
+
+- pedido-service
+	- Upstream: `http://host.docker.internal:8080`
+	- Ruta: `/api/orders`
+
+- auth-service
+	- Upstream: `http://host.docker.internal:8081`
+	- Ruta: `/api/auth`
+
+- billing-service
+	- Upstream: `http://host.docker.internal:8080`
+	- Ruta: `/api/billing`
+
+- fleet-service
+	- Upstream: `http://host.docker.internal:8083`
+	- Ruta: `/api/flota`
+
+Nota: Asegúrese de que cada microservicio esté levantado en el puerto indicado antes de probar por el gateway.
+
+### Pruebas por el proxy
+
+```zsh
+# Billing: calcular tarifa
+curl -i -X POST http://localhost:8000/api/billing/calculate \
+	-H "Content-Type: application/json" \
+	-d '{"distanceKm":1,"durationMin":1}'
+
+# Billing: crear factura
+curl -i -X POST 'http://localhost:8000/api/billing/invoices?customerId=cliente123' \
+	-H "Content-Type: application/json" \
+	-d '{"distanceKm":4.5,"durationMin":12}'
+
+# Auth: listar usuarios
+curl -i http://localhost:8000/api/auth
+
+# Fleet: listar flota
+curl -i http://localhost:8000/api/flota
+```
+
+### Cómo ver el API Gateway
+
+Kong expone un Admin API en `http://localhost:8001` para inspección y administración.
+
+```zsh
+# Ver estado general del Admin API
+curl -i http://localhost:8001/
+
+# Listar servicios cargados (DB-less: según kong.yml)
+curl -s http://localhost:8001/services | jq .
+
+# Listar rutas configuradas
+curl -s http://localhost:8001/routes | jq .
+
+# Probar el proxy (puerto 8000) hacia un servicio
+curl -i -X POST http://localhost:8000/api/billing/calculate \
+	-H "Content-Type: application/json" \
+	-d '{"distanceKm":1,"durationMin":1}'
+```
+
+### Consideraciones
+
+- `strip_path: false` en las rutas significa que el upstream recibirá el path completo con el prefijo `/api/...`, que coincide con los `@RequestMapping` definidos en los controladores.
+- Si aparece `404 Not Found` a través de Kong, el servicio objetivo podría estar respondiendo 404; verifique que el endpoint exista y el servicio esté operativo.
+- Si aparece `502 Bad Gateway`, normalmente el servicio objetivo no está accesible (proceso caído o puerto incorrecto).
+- Compose puede advertir que el atributo `version` es obsoleto; es seguro eliminarlo del `docker-compose.yml` si desea evitar el mensaje.
 
 ## Verificación en la base de datos
 
