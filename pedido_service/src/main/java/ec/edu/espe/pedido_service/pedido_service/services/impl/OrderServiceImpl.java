@@ -99,6 +99,26 @@ public class OrderServiceImpl implements OrderService {
                 .status(order.getStatus())
                 .build();
     }
+    @Override
+    public List<OrderResponseDto> findByCustomerName(String customerName) {
+
+        List<Order> orders =
+                repository.findByCustomerNameContainingIgnoreCase(customerName);
+
+        if (orders.isEmpty()) {
+            throw new ResourceNotFoundException(
+                    "No orders found matching customer name: " + customerName
+            );
+        }
+
+        return orders.stream()
+                .map(this::mapToDto)
+                .toList();
+    }
+
+
+
+
 
 
 }

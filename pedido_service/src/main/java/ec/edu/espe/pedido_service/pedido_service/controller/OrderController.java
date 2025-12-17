@@ -49,5 +49,12 @@ public class OrderController {
         service.cancel(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<OrderResponseDto>> searchByCustomerName(
+            @RequestParam String customerName) {
+        return ResponseEntity.ok(service.findByCustomerName(customerName));
+    }
+
 }
 

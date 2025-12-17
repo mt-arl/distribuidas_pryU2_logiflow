@@ -17,6 +17,9 @@ public interface OrderService {
 
     void cancel(Long id);
 
+    List<OrderResponseDto> findByCustomerName(String customerName);
+
+
 
 }
 
