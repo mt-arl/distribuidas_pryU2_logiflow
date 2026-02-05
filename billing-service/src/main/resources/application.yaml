@@ -1,21 +1,17 @@
+server:
+  port: 8082
+
 spring:
   application:
     name: billing-service
-
   datasource:
-    # Conexión fija a tu servidor principal (5432) con las credenciales proporcionadas
-    url: jdbc:postgresql://localhost:5432/delivery
-    username: delivery_user
-    password: qwerty123
-    driver-class-name: org.postgresql.Driver
-
+    url: jdbc:postgresql://localhost:5432/logiflow
+    username: postgres
+    password: root
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
     properties:
       hibernate:
-        format_sql: true
-
-server:
-  port: 8080
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true

@@ -13,6 +13,10 @@ public class CalculateFareRequest {
     @DecimalMin("0")
     private BigDecimal durationMin;
 
+    private String zona;
+
+    private String tipoVehiculo;
+
     public BigDecimal getDistanceKm() {
         return distanceKm;
     }
@@ -27,5 +31,21 @@ public class CalculateFareRequest {
 
     public void setDurationMin(BigDecimal durationMin) {
         this.durationMin = durationMin;
+    }
+
+    public String getZona() {
+        return zona;
+    }
+
+    public void setZona(String zona) {
+        this.zona = zona;
+    }
+
+    public String getTipoVehiculo() {
+        return tipoVehiculo;
+    }
+
+    public void setTipoVehiculo(String tipoVehiculo) {
+        this.tipoVehiculo = tipoVehiculo;
     }
 }

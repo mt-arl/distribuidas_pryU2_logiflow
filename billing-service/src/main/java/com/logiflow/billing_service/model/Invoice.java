@@ -32,6 +32,12 @@ public class Invoice {
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
+    @Column(name = "zona")
+    private String zona;
+
+    @Column(name = "tipo_vehiculo")
+    private String tipoVehiculo;
+
     public Invoice() {
         this.id = UUID.randomUUID().toString();
         this.createdAt = Instant.now();
@@ -75,5 +81,21 @@ public class Invoice {
 
     public void setCreatedAt(Instant createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getZona() {
+        return zona;
+    }
+
+    public void setZona(String zona) {
+        this.zona = zona;
+    }
+
+    public String getTipoVehiculo() {
+        return tipoVehiculo;
+    }
+
+    public void setTipoVehiculo(String tipoVehiculo) {
+        this.tipoVehiculo = tipoVehiculo;
     }
 }

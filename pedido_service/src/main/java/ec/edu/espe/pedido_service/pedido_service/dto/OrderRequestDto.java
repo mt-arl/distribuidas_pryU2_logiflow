@@ -24,5 +24,3 @@ public class OrderRequestDto {
     @NotNull(message = "Delivery type is required")
     private DeliveryType deliveryType;
 }
-
-

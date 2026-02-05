@@ -1,8 +1,13 @@
+server:
+  port: 8084
+
 spring:
+  application:
+    name: pedido-service
   datasource:
-    url: jdbc:postgresql://localhost:5432/pedido_db
+    url: jdbc:postgresql://localhost:5432/logiflow
     username: postgres
-    password: slvplanA2003
+    password: root
   jpa:
     hibernate:
       ddl-auto: update
@@ -11,7 +16,3 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
     show-sql: true
-
-server:
-  port: 8080
-
